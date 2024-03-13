@@ -1,4 +1,13 @@
-def get_nums_in_a_row(grid, p):
+def basic_get_nums_in_a_row(grid, p):
+    """
+        get_nums_in_a_row:
+            @params: 
+                grid: List[str] -> list of row stirings holding the current position
+                p: str -> player color as either 'r' or 'y'
+            @returns:
+                nums: Dict[int] -> dictionary of how many in a row 
+
+    """
     nums = {"2":0, "3":0, "4":0}
     # check rows
     for row in grid:
@@ -76,7 +85,7 @@ def get_nums_in_a_row(grid, p):
 
   
 def score(grid, p):
-    in_a_row = get_nums_in_a_row(grid, p)
+    in_a_row = basic_get_nums_in_a_row(grid, p)
     s = 0
     for row in grid:
         for i in range(len(row)):

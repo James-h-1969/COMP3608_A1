@@ -1,12 +1,12 @@
 # get nums needs to handle more then 4   
-from functions import eval
+import functions
 
 def main(grid):
     grid = grid.split(",")
     for row in grid:
        print(row)
     print()
-    print(f"Evaluation of the above grid: {eval(grid)}")
+    print(f"Evaluation of the above grid: {functions.eval(grid)}")
 
 
 main(".......,.......,.......,....y..,..ryryr,..yyrrr")
