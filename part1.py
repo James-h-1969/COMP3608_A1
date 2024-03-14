@@ -1,3 +1,67 @@
+def game_over(grid, p):
+    # check 4 in a row in rows
+    for row in range(len(grid)):
+      in_a_row = 0
+      for col in range(len(grid[0])):
+        if grid[row][col] == p:
+          in_a_row += 1
+        else:
+          in_a_row = 0
+        if in_a_row == 4:
+          return True
+      
+    for col in range(len(grid[0])):
+      in_a_col = 0
+      for row in range(len(grid)):
+        if grid[row][col] == p:
+          in_a_col += 1
+        else:
+          in_a_col = 0
+        if in_a_col == 4:
+          return True
+      
+    AMOUNT_OF_DIAGONALS = 12
+    i0, j0 = 5, 0
+    for _ in range(AMOUNT_OF_DIAGONALS):
+        current_in_diag = 0
+        i, j = i0, j0
+        while (i < len(grid) and j < len(grid[0])):
+            char = grid[i][j]
+            if char == p:
+                current_in_diag += 1
+            else:
+                current_in_diag = 0
+            if current_in_diag == 4:
+              return True
+            i += 1
+            j += 1
+
+        if i0 - 1 >= 0:
+            i0 -= 1
+        else:
+            j0 += 1
+            
+    i0, j0 = 0, 0
+    for _ in range(AMOUNT_OF_DIAGONALS):
+        current_in_diag = 0
+        i, j = i0, j0
+        while (i < len(grid) and j >= 0):
+            char = grid[i][j]
+            if char == p:
+                current_in_diag += 1
+            else:
+                current_in_diag = 0
+            if current_in_diag == 4:
+              return True
+            i += 1
+            j -= 1
+        if j0 + 1 < len(grid[0]):
+            j0 += 1
+        else:
+            i0 += 1   
+            
+    return False
+
 def basic_get_nums_in_a_row(grid, p):
     """
         get_nums_in_a_row:
@@ -96,8 +160,9 @@ def score(grid, p):
     s += 1000 * in_a_row["4"]
     return s
 
-def eval(grid):
-    return score(grid, "r") - score(grid, "y")
+def eval(grid, p):
+    other_p = "r" if p == "y" else "y"
+    return score(grid, p) - score(grid, other_p)
   
 # get nums needs to handle more then 4   
 COLUMNS = 7
@@ -112,10 +177,10 @@ class Node():
         self.children = []
         self.color = color
 
-    def set_val(self):
-        self.val = eval(self.board_state)
+    def set_val(self, colour):
+        self.val = eval(self.board_state, colour)
 
-    def get_children(self):
+    def get_children(self, colour):
         for j in range(COLUMNS):
             if self.board_state[0][j] != ".":
                 continue
@@ -127,16 +192,19 @@ class Node():
             i -= 2 if collision else 1
             new_board_state = self.board_state.copy()
             new_board_state[i] = new_board_state[i][:j] + self.color + new_board_state[i][j+1:]
-            new_color = "r" if self.color == "y" else "r"
+            new_color = self.get_opp_colour()
             newNode = Node(new_board_state, self.depth + 1, j, new_color)
-            self.children.append(newNode)        
+            self.children.append(newNode)   
 
-def minmax(node: Node, max_depth):   
-    if node.depth == max_depth:
-        node.set_val()
+    def get_opp_colour(self):
+        return "y" if self.color == "r" else "r"
+
+def minmax(node: Node, max_depth, colour):   
+    if node.depth == max_depth or game_over(node.board_state, node.get_opp_colour()):
+        node.set_val(colour)
         return (node.column, node.val, 1)
     
-    node.get_children()
+    node.get_children(colour)
 
     finding_max = (node.depth % 2 == 0)
     
@@ -145,7 +213,7 @@ def minmax(node: Node, max_depth):
         final_val = float("-inf") if finding_max else float("inf")
         final_col = 0
         for child in node.children:
-            curr_col, curr_val, n_children = minmax(child, max_depth)
+            curr_col, curr_val, n_children = minmax(child, max_depth, colour)
             counter += n_children
             if finding_max and curr_val > final_val:
                 final_val = curr_val
@@ -153,21 +221,23 @@ def minmax(node: Node, max_depth):
             elif not finding_max and curr_val < final_val:
                 final_val = curr_val
                 final_col = curr_col
+            elif curr_val == final_val and curr_col < final_col:
+                final_col = curr_col
+                
     else:
-        node.set_val()
+        node.set_val(colour)
         return (node.column, node.val, 1)
 
-    return (final_col, final_val, counter)
+    return (final_col, final_val, counter+1)
   
 def connect_four_mm(grid, colour, depth):
-    MAX_DEPTH = depth
     grid = grid.split(",")
     grid.reverse()
     p = "r" if colour == "red" else "y"
     initial_node = Node(grid, 0, 0, p)
-    col, val, count = minmax(initial_node, depth)
-    return f"{col}\n{count+1}"
+    col, val, count = minmax(initial_node, depth, p)
+    return f"{col}\n{count}"
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    connect_four_mm(".......,.......,.......,.......,.......,.......", "red", 1)
+    connect_four_mm(".......,.......,.......,.......,.......,.......", "red", 5)
