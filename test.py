@@ -32,14 +32,19 @@ while(not game_over(start_state, p)):
         # move = input("MOVE: ")
         # move += "\nhi"
         move = connect_four_final(other_start, "red", 6)
+        if "." not in other_start:
+            print("TIE OCCURED")
+            exit()
         start_state = make_move(start_state, int(move.split("\n")[0]), "r")
     else:
         move = connect_four_final_2(other_start, "yellow", 6)
+        if "." not in other_start:
+            print("TIE OCCURED")
+            exit()
         start_state = make_move(start_state, int(move.split("\n")[0]), "y")
     play_1 = not play_1
     p =  "r" if p == "y" else "y"
-    print(move)
-    print(other_start)
+
 
 
 if play_1:

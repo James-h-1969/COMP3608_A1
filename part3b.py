@@ -2,6 +2,12 @@ import sys
 import threading 
 import time
 
+# get nums needs to handle more then 4   
+COLUMNS = 7
+ROWS = 6
+
+COLUMN_ORDER = [3,2,1,4,5,0,6] # test differnet
+
 def game_over(grid, p):
     # check 4 in a row in rows
     for row in range(len(grid)):
@@ -77,21 +83,24 @@ def basic_get_nums_in_a_row(grid, p):
 
     """
     nums = {"2":0, "3":0, "4":0}
+    other_p = "r" if p == "y" else "y"
     # check rows
     for row in grid:
         current_in_a_row = 0
         for i in range(len(row)):
             if row[i] == p:
+                if current_in_a_row == 0:
+                    start = row[i-1] if i - 1 > 0 else other_p
                 current_in_a_row += 1
             else:
                 if current_in_a_row > 4:
                     current_in_a_row = 4
-                if str(current_in_a_row) in nums.keys():
+                if str(current_in_a_row) in nums.keys() and (start == "." or row[i] == "."):
                     nums[str(current_in_a_row)] += 1
                 current_in_a_row = 0
         if current_in_a_row > 4:
             current_in_a_row = 4
-        if str(current_in_a_row) in nums.keys():
+        if str(current_in_a_row) in nums.keys() and start == ".":
             nums[str(current_in_a_row)] += 1
 
   # check columns
@@ -104,13 +113,13 @@ def basic_get_nums_in_a_row(grid, p):
             else:
                 if current_in_a_column > 4:
                     current_in_a_row = 4
-                if str(current_in_a_column) in nums.keys():
+                if str(current_in_a_column) in nums.keys() and char != ".":
                     nums[str(current_in_a_column)] += 1
                 current_in_a_column = 0
-        if current_in_a_column > 4:
-            current_in_a_column = 4
-        if str(current_in_a_column) in nums.keys():
-            nums[str(current_in_a_column)] += 1
+        # if current_in_a_column > 4:
+        #     current_in_a_column = 4
+        # if str(current_in_a_column) in nums.keys():
+        #     nums[str(current_in_a_column)] += 1
 
   # check diagonals
     AMOUNT_OF_DIAGONALS = 12
@@ -121,18 +130,20 @@ def basic_get_nums_in_a_row(grid, p):
         while (i < len(grid) and j < len(grid[0])):
             char = grid[i][j]
             if char == p:
+                if current_in_diag == 0:
+                    start = grid[i + 1][j - 1] if i + 1 < len(grid) and j - 1 >= 0 else '.'
                 current_in_diag += 1
             else:
                 if current_in_diag > 4:
                     current_in_diag = 4
-                if str(current_in_diag) in nums.keys():
+                if str(current_in_diag) in nums.keys() and (start == '.' or char == '.'):
                     nums[str(current_in_diag)] += 1
                 current_in_diag = 0
             i += 1
             j += 1
         if current_in_diag > 4:
             current_in_diag = 4
-        if str(current_in_diag) in nums.keys():
+        if str(current_in_diag) in nums.keys() and start == ".":
             nums[str(current_in_diag)] += 1
 
         if i0 - 1 >= 0:
@@ -146,18 +157,22 @@ def basic_get_nums_in_a_row(grid, p):
         while (i < len(grid) and j >= 0):
             char = grid[i][j]
             if char == p:
+                if current_in_diag == 0:
+                    # Check if the sequence start is open
+                    start = grid[i - 1][j + 1] if i > 0 and j + 1 < COLUMNS else '.'
                 current_in_diag += 1
+                
             else:
                 if current_in_diag > 4:
                     current_in_diag = 4
-                if str(current_in_diag) in nums.keys():
+                if str(current_in_diag) in nums.keys() and (start == '.' or char == '.'):
                     nums[str(current_in_diag)] += 1
                 current_in_diag = 0
             i += 1
             j -= 1
         if current_in_diag > 4:
             current_in_diag = 4
-        if str(current_in_diag) in nums.keys():
+        if str(current_in_diag) in nums.keys() and start == ".":
             nums[str(current_in_diag)] += 1
         if j0 + 1 < len(grid[0]):
             j0 += 1
@@ -182,11 +197,6 @@ def eval(grid, p):
     other_p = "r" if p == "y" else "y"
     return score(grid, p) - score(grid, other_p)
   
-# get nums needs to handle more then 4   
-COLUMNS = 7
-ROWS = 6
-
-COLUMN_ORDER = [3,2,1,4,5,0,6] # test differnet
 
 class Node():
     def __init__(self, board_state, depth, column, color):
@@ -300,4 +310,7 @@ def connect_four_ab_timed(grid, colour, depth):
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    print(connect_four_final_2("y.yrr.y,r.yyr..,y.r.r..,r......,y......,y......", "yellow", 4))
+    st = time.time()
+    print(connect_four_final_2(".......,.......,.......,.......,.......,.......", "yellow", 9))
+    et = time.time() - st
+    print(et)
