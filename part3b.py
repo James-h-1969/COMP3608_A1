@@ -1,4 +1,7 @@
 import sys
+import threading 
+import time
+
 def game_over(grid, p):
     # check 4 in a row in rows
     for row in range(len(grid)):
@@ -183,6 +186,8 @@ def eval(grid, p):
 COLUMNS = 7
 ROWS = 6
 
+COLUMN_ORDER = [3,2,1,4,5,0,6] # test differnet
+
 class Node():
     def __init__(self, board_state, depth, column, color):
         self.board_state = board_state
@@ -196,7 +201,7 @@ class Node():
         self.val = eval(self.board_state, colour)
 
     def get_children(self, colour):
-        for j in range(COLUMNS):
+        for j in COLUMN_ORDER:
             if self.board_state[0][j] != ".":
                 continue
             i = 1
@@ -218,8 +223,7 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
     g_over = game_over(node.board_state, node.get_opp_colour())
     if node.depth == max_depth or g_over:
         node.set_val(colour)
-        if g_over: 
-            
+        if g_over:  
             amount = 10_000 if colour == node.get_opp_colour() else -10_000
         else:
             amount = node.val
@@ -233,7 +237,8 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
     if len(node.children) > 0:
         final_val =-1 * sys.maxsize if finding_max else sys.maxsize
         final_col = 0
-        for i, child in enumerate(node.children):
+        for m, child in enumerate(node.children):
+            i = child.column
             curr_col, curr_val, n_children = minmax(child, alpha, beta, max_depth, colour)
             counter += n_children
 
@@ -243,7 +248,8 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
             elif not finding_max and curr_val < final_val:
                 final_val = curr_val
                 final_col = i
-
+            elif curr_val == final_val and curr_col < final_col:
+                final_col = i
 
             if finding_max:
                 alpha = max([alpha, curr_val])
@@ -253,6 +259,7 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
                 beta = min([beta, curr_val])
                 if beta <= alpha:
                     break
+                
     else:
         node.set_val(colour)
         return (node.column, node.val, 1)
@@ -260,7 +267,7 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
 
     return (final_col, final_val, counter+1)
   
-def connect_four_ab(grid, colour, depth):
+def connect_four_final_2(grid, colour, depth):
     grid = grid.split(",")
     grid.reverse()
     p = "r" if colour == "red" else "y"
@@ -268,7 +275,29 @@ def connect_four_ab(grid, colour, depth):
     col, val, count = minmax(initial_node, -1 * sys.maxsize, sys.maxsize, depth, p)
     return f"{col}\n{count}"
 
+def connect_four_ab_timed(grid, colour, depth):
+    # Function to run connect_four_ab with a time limit of 1 second
+    def run_with_timeout():
+        # Run the original function and store the result
+        result = connect_four_final_2(grid, colour, depth)
+        # Store the result in a global variable
+        global result_data
+        result_data = result
+
+    # Initialize a threading object with the target function
+    thread = threading.Thread(target=run_with_timeout)
+    # Start the thread
+    thread.start()
+    # Join the thread with a timeout of 1 second
+    thread.join(timeout=1)
+
+    # Check if the thread is still alive (meaning it hasn't finished within 1 second)
+    if thread.is_alive():
+        return "Timeout occurred: The function took longer than 1 second to execute."
+    else:
+        # Return the result obtained from the function
+        return result_data
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    print(connect_four_ab("r.yyyrr,y.....r,y.....r,y.....y,r......,.......", "red", 5))
+    print(connect_four_final_2("y.yrr.y,r.yyr..,y.r.r..,r......,y......,y......", "yellow", 4))

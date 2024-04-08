@@ -262,7 +262,7 @@ def connect_four_mm(grid, colour, depth):
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    print(connect_four_mm("....y.r,......r,......r,.......,.......,.......", "yellow", 2))
+    print(connect_four_mm("r.yyyrr,y.....r,y.....r,y.....y,r.....r,.......", "yellow", 4))
     
 
 

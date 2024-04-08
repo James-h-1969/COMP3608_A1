@@ -1,7 +1,6 @@
 import sys
-import threading
+import threading 
 import time
-
 
 def game_over(grid, p):
     # check 4 in a row in rows
@@ -78,18 +77,16 @@ def basic_get_nums_in_a_row(grid, p):
 
     """
     nums = {"2":0, "3":0, "4":0}
-    other_p = "r" if p == "y" else "y"
     # check rows
     for row in grid:
         current_in_a_row = 0
         for i in range(len(row)):
             if row[i] == p:
                 current_in_a_row += 1
-                start = row[i-1] if i -1 > 0 else other_p
             else:
                 if current_in_a_row > 4:
                     current_in_a_row = 4
-                if str(current_in_a_row) in nums.keys() and (row[i] != other_p or start != other_p):
+                if str(current_in_a_row) in nums.keys():
                     nums[str(current_in_a_row)] += 1
                 current_in_a_row = 0
         if current_in_a_row > 4:
@@ -100,14 +97,14 @@ def basic_get_nums_in_a_row(grid, p):
   # check columns
     for i in range(len(grid[0])):
         current_in_a_column = 0
-        for j in range(len(grid)-1, 0, -1):
+        for j in range(len(grid)):
             char = grid[j][i] # iterate through each row of the column
             if char == p:
                 current_in_a_column += 1
             else:
                 if current_in_a_column > 4:
                     current_in_a_row = 4
-                if str(current_in_a_column) in nums.keys() and char != other_p:
+                if str(current_in_a_column) in nums.keys():
                     nums[str(current_in_a_column)] += 1
                 current_in_a_column = 0
         if current_in_a_column > 4:
@@ -183,17 +180,13 @@ def score(grid, p):
 
 def eval(grid, p):
     other_p = "r" if p == "y" else "y"
-    if (game_over(grid, p)):
-        return 10_000
-    if (game_over(grid, other_p)):
-        return -10_000
     return score(grid, p) - score(grid, other_p)
   
 # get nums needs to handle more then 4   
 COLUMNS = 7
 ROWS = 6
 
-COLUMN_ORDER = [3,2,4,1,5,0,6]
+COLUMN_ORDER = [3,2,1,4,5,0,6] # test differnet
 
 class Node():
     def __init__(self, board_state, depth, column, color):
@@ -208,8 +201,7 @@ class Node():
         self.val = eval(self.board_state, colour)
 
     def get_children(self, colour):
-        for c in range(COLUMNS):
-            j = COLUMN_ORDER[c]
+        for j in COLUMN_ORDER:
             if self.board_state[0][j] != ".":
                 continue
             i = 1
@@ -232,7 +224,7 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
     if node.depth == max_depth or g_over:
         node.set_val(colour)
         if g_over:  
-            amount = -10_000 if colour == node.get_opp_colour() else 10_000
+            amount = 10_000 if colour == node.get_opp_colour() else -10_000
         else:
             amount = node.val
         return (node.column, amount, 1)
@@ -245,15 +237,18 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
     if len(node.children) > 0:
         final_val =-1 * sys.maxsize if finding_max else sys.maxsize
         final_col = 0
-        for i, child in enumerate(node.children):
-            i = COLUMN_ORDER[i]
+        for m, child in enumerate(node.children):
+            i = child.column
             curr_col, curr_val, n_children = minmax(child, alpha, beta, max_depth, colour)
             counter += n_children
+
             if finding_max and curr_val > final_val:
                 final_val = curr_val
                 final_col = i
             elif not finding_max and curr_val < final_val:
                 final_val = curr_val
+                final_col = i
+            elif curr_val == final_val and curr_col < final_col:
                 final_col = i
 
             if finding_max:
@@ -305,4 +300,4 @@ def connect_four_ab_timed(grid, colour, depth):
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    print(connect_four_ab_timed("r...y..,r......,r......,.......,.......,.......", "yellow", 5))
+    print(connect_four_final("r.yyyrr,y.....r,y.....r,y.....y,r.....r,.......", "yellow", 4))
