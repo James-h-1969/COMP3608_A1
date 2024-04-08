@@ -1,3 +1,4 @@
+import sys
 def game_over(grid, p):
     # check 4 in a row in rows
     for row in range(len(grid)):
@@ -80,12 +81,15 @@ def basic_get_nums_in_a_row(grid, p):
             if row[i] == p:
                 current_in_a_row += 1
             else:
+                if current_in_a_row > 4:
+                    current_in_a_row = 4
                 if str(current_in_a_row) in nums.keys():
                     nums[str(current_in_a_row)] += 1
                 current_in_a_row = 0
+        if current_in_a_row > 4:
+            current_in_a_row = 4
         if str(current_in_a_row) in nums.keys():
             nums[str(current_in_a_row)] += 1
-        current_in_a_row = 0
 
   # check columns
     for i in range(len(grid[0])):
@@ -95,9 +99,13 @@ def basic_get_nums_in_a_row(grid, p):
             if char == p:
                 current_in_a_column += 1
             else:
+                if current_in_a_column > 4:
+                    current_in_a_row = 4
                 if str(current_in_a_column) in nums.keys():
                     nums[str(current_in_a_column)] += 1
                 current_in_a_column = 0
+        if current_in_a_column > 4:
+            current_in_a_column = 4
         if str(current_in_a_column) in nums.keys():
             nums[str(current_in_a_column)] += 1
 
@@ -112,11 +120,15 @@ def basic_get_nums_in_a_row(grid, p):
             if char == p:
                 current_in_diag += 1
             else:
+                if current_in_diag > 4:
+                    current_in_diag = 4
                 if str(current_in_diag) in nums.keys():
                     nums[str(current_in_diag)] += 1
                 current_in_diag = 0
             i += 1
             j += 1
+        if current_in_diag > 4:
+            current_in_diag = 4
         if str(current_in_diag) in nums.keys():
             nums[str(current_in_diag)] += 1
 
@@ -133,12 +145,15 @@ def basic_get_nums_in_a_row(grid, p):
             if char == p:
                 current_in_diag += 1
             else:
+                if current_in_diag > 4:
+                    current_in_diag = 4
                 if str(current_in_diag) in nums.keys():
-                    
                     nums[str(current_in_diag)] += 1
                 current_in_diag = 0
             i += 1
             j -= 1
+        if current_in_diag > 4:
+            current_in_diag = 4
         if str(current_in_diag) in nums.keys():
             nums[str(current_in_diag)] += 1
         if j0 + 1 < len(grid[0]):
@@ -199,10 +214,19 @@ class Node():
     def get_opp_colour(self):
         return "y" if self.color == "r" else "r"
 
-def minmax(node: Node, max_depth, colour):   
-    if node.depth == max_depth or game_over(node.board_state, node.get_opp_colour()):
+def minmax(node: Node, max_depth, colour):  
+    if node.depth ==1 :
+        print(node.board_state)
+
+    g_over = game_over(node.board_state, node.get_opp_colour())
+    if node.depth == max_depth or g_over:
         node.set_val(colour)
-        return (node.column, node.val, 1)
+        if g_over:  
+            amount = 10_000 if colour == node.get_opp_colour() else -10_000
+        else:
+            amount = node.val
+        print(amount)
+        return (node.column, amount, 1)
     
     node.get_children(colour)
 
@@ -223,10 +247,12 @@ def minmax(node: Node, max_depth, colour):
                 final_col = curr_col
             elif curr_val == final_val and curr_col < final_col:
                 final_col = curr_col
+            print(final_val)
                 
     else:
         node.set_val(colour)
         return (node.column, node.val, 1)
+    
 
     return (final_col, final_val, counter+1)
   
@@ -240,4 +266,8 @@ def connect_four_mm(grid, colour, depth):
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    connect_four_mm(".......,.......,.......,.......,.......,.......", "red", 5)
+    print(connect_four_mm("r...y..,r......,r......,.......,.......,.......", "yellow", 2))
+    
+
+
+
