@@ -215,9 +215,6 @@ class Node():
         return "y" if self.color == "r" else "r"
 
 def minmax(node: Node, max_depth, colour):  
-    if node.depth ==1 :
-        print(node.board_state)
-
     g_over = game_over(node.board_state, node.get_opp_colour())
     if node.depth == max_depth or g_over:
         node.set_val(colour)
@@ -225,7 +222,6 @@ def minmax(node: Node, max_depth, colour):
             amount = 10_000 if colour == node.get_opp_colour() else -10_000
         else:
             amount = node.val
-        print(amount)
         return (node.column, amount, 1)
     
     node.get_children(colour)
@@ -236,24 +232,24 @@ def minmax(node: Node, max_depth, colour):
     if len(node.children) > 0:
         final_val = float("-inf") if finding_max else float("inf")
         final_col = 0
-        for child in node.children:
+        for i, child in enumerate(node.children):
             curr_col, curr_val, n_children = minmax(child, max_depth, colour)
             counter += n_children
             if finding_max and curr_val > final_val:
                 final_val = curr_val
-                final_col = curr_col
+                final_col = i
             elif not finding_max and curr_val < final_val:
                 final_val = curr_val
-                final_col = curr_col
-            elif curr_val == final_val and curr_col < final_col:
-                final_col = curr_col
-            print(final_val)
+                final_col = i
+            elif curr_val == final_val and i < final_col:
+                final_col = i
                 
     else:
         node.set_val(colour)
         return (node.column, node.val, 1)
     
-
+    if (node.depth == 0):
+        (final_col, final_val, counter+1)
     return (final_col, final_val, counter+1)
   
 def connect_four_mm(grid, colour, depth):
@@ -266,7 +262,7 @@ def connect_four_mm(grid, colour, depth):
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    print(connect_four_mm("r...y..,r......,r......,.......,.......,.......", "yellow", 2))
+    print(connect_four_mm("....y.r,......r,......r,.......,.......,.......", "yellow", 2))
     
 
 

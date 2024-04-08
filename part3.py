@@ -245,15 +245,16 @@ def minmax(node: Node, alpha, beta, max_depth, colour):
     if len(node.children) > 0:
         final_val =-1 * sys.maxsize if finding_max else sys.maxsize
         final_col = 0
-        for child in node.children:
+        for i, child in enumerate(node.children):
+            i = COLUMN_ORDER[i]
             curr_col, curr_val, n_children = minmax(child, alpha, beta, max_depth, colour)
             counter += n_children
             if finding_max and curr_val > final_val:
                 final_val = curr_val
-                final_col = curr_col
+                final_col = i
             elif not finding_max and curr_val < final_val:
                 final_val = curr_val
-                final_col = curr_col
+                final_col = i
 
             if finding_max:
                 alpha = max([alpha, curr_val])
@@ -304,4 +305,4 @@ def connect_four_ab_timed(grid, colour, depth):
 
 if __name__ == '__main__':
     # Example function call below, you can add your own to test the connect_four_mm function
-    print(connect_four_final("r...y..,r......,r......,.......,.......,.......", "yellow", 6))
+    print(connect_four_ab_timed("r...y..,r......,r......,.......,.......,.......", "yellow", 5))
